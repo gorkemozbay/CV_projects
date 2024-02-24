@@ -3,6 +3,9 @@ import cv2
 import threading
 from   ultralytics import YOLO 
 
+import Utils.project_settings as ps
+from   Controllers.UI_controller import UIController 
+
 
 TEST_VIDEO = r'Videos\cars.mp4'
 MODEL      = r'Models\yolov8n.pt'
@@ -25,7 +28,7 @@ def annotate_frame(results, frame):
         boxes = result.boxes.cpu().numpy()
         xyxys = boxes.xyxy
         for xyxy in xyxys:
-            cv2.rectangle(frame, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (0, 255, 0), 2)
+            cv2.rectangle(frame, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), ps.GREEN, ps.BBOX_THICKNESS)
     return frame
 
 
@@ -41,12 +44,16 @@ def main():
     source_path = os.path.join(os.getcwd(), TEST_VIDEO)
     cap = cv2.VideoCapture(source_path)
     
+    UI_controller = UIController()
+    
     if not cap.isOpened():
         print("Failed to open source")
         exit()
     
-    process_video(cap, model)
+    video_processor = threading.Thread(target=process_video, args=(cap, model,))
+    video_processor.start()
     
+    video_processor.join()
     
 if __name__ == "__main__":
     main()
