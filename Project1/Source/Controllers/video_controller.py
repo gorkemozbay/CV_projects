@@ -37,12 +37,22 @@ class VideoController():
         return results
 
 
-    def annotate_frame(self, results, frame):
+    def annotate_frame_by_box(self, results, frame):
         for result in results:
             boxes = result.boxes.cpu().numpy()
             xyxys = boxes.xyxy
             for xyxy in xyxys:
                 cv2.rectangle(frame, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), ps.GREEN, ps.BBOX_THICKNESS)
+        return frame
+
+    
+    def annotate_frame_by_center(self, results, frame):
+        for result in results:
+            boxes = result.boxes.cpu().numpy()
+            xyxys = boxes.xyxy
+            for xyxy in xyxys:
+                center_coordinates = (int((xyxy[0] + xyxy[2]) / 2), int((xyxy[1] + xyxy[3]) / 2)) 
+                cv2.circle(frame, center_coordinates, ps.BBOX_CIRCLE_RADIUS, ps.GREEN, ps.BBOX_THICKNESS)
         return frame
 
 
@@ -64,7 +74,8 @@ class VideoController():
             success, frame = self.cap.read()
             if success:
                 results = self.get_YOLO_results(frame)
-                annotated_frame = self.annotate_frame(results, frame)
+                #annotated_frame = self.annotate_frame_by_box(results, frame)
+                annotated_frame = self.annotate_frame_by_center(results, frame)
                 annotated_frame = self.add_lines(annotated_frame)
                 cv2.imshow("out", annotated_frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
