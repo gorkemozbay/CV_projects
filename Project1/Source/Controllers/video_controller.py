@@ -66,8 +66,15 @@ class VideoController():
         return frame
 
 
+    def show_count(self, frame):
+        car_count = f"Car Count: {self.collusion_controller.number_of_collusions}"
+        cv2.putText(frame, car_count, ps.TEXT_POS, ps.TEXT_FONT, 
+                    ps.TEXT_FONT_SCALE, ps.BLUE, ps.TEXT_THICKNESS)
+        return frame    
+    
+    
     def run(self):
-        
+    
         if not self.cap.isOpened():
             print("Failed to open source")
             exit()
@@ -82,6 +89,7 @@ class VideoController():
                 #annotated_frame = self.annotate_frame_by_box(results, frame)
                 annotated_frame = self.annotate_frame_by_center(results, frame)
                 annotated_frame = self.add_lines(annotated_frame)
+                annotated_frame = self.show_count(annotated_frame)
                 cv2.imshow("out", annotated_frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
