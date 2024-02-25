@@ -1,8 +1,15 @@
 
+# OpenCV Settings
 BLUE  = (255, 0, 0)
 GREEN = (0, 255, 0)
 RED   = (0, 0, 255)
-
 BBOX_THICKNESS     = 2
 BBOX_CIRCLE_RADIUS = 3
 LINE_THICKNESS     = 3
+
+# YOLO Settings
+SHOW_YOLO_SCREEN = False
+YOLO_THRESHOLD   = 0.4
+
+# Algorithm Settings
+COLLUSION_THRESHOLD = 2

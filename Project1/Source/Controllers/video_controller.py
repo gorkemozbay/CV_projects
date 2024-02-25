@@ -1,29 +1,28 @@
 import cv2
 import Utils.project_settings as ps
 from   Utils.data_classes import Line, Point
+from   Controllers.collusion_controller import CollusionController
 
 class VideoController():
     
     def __init__(self, source, model):
         print("VideoController is created")
+        self.collusion_controller = CollusionController()
         self.cap = cv2.VideoCapture(source)
         self.model = model
-        # Move the fields below somewhere else
-        self.line_list = []
-        self.point1 = None
-        self.point2 = None
+        self.point_couple = [None, None]
         self.point_count = 0
 
 
-    def get_mouse_position(self, event, x, y, flags, param):
+    def check_mouse_event(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.point_count += 1
             if self.point_count %2 == 1:
-                self.point1 = Point(x, y)
+                self.point_couple[0] = Point(x, y)
             else:
-                self.point2 = Point(x, y)
-                line = Line(self.point1, self.point2, ps.RED, ps.LINE_THICKNESS)
-                self.line_list.append(line)
+                self.point_couple[1] = Point(x, y)
+                line = Line(self.point_couple[0], self.point_couple[1], ps.RED, ps.LINE_THICKNESS)
+                self.collusion_controller.line_list.append(line)
 
 
     def draw_line(self, frame, line):
@@ -33,7 +32,8 @@ class VideoController():
 
 
     def get_YOLO_results(self, frame):
-        results = self.model(frame, classes=[1,2,3,7], show=False, verbose=False)
+        results = self.model(frame, classes=[1,2,3,7], 
+                             show=ps.SHOW_YOLO_SCREEN, conf=ps.YOLO_THRESHOLD ,verbose=False)
         return results
 
 
@@ -57,7 +57,7 @@ class VideoController():
 
 
     def add_lines(self, frame):
-        for line in self.line_list:
+        for line in self.collusion_controller.line_list:
             self.draw_line(frame, line)
         return frame
 
@@ -69,11 +69,12 @@ class VideoController():
             exit()
         
         cv2.namedWindow("out")
-        cv2.setMouseCallback("out", self.get_mouse_position)
+        cv2.setMouseCallback("out", self.check_mouse_event)
         while True:
             success, frame = self.cap.read()
             if success:
                 results = self.get_YOLO_results(frame)
+                self.collusion_controller.check_for_collusions(results)
                 #annotated_frame = self.annotate_frame_by_box(results, frame)
                 annotated_frame = self.annotate_frame_by_center(results, frame)
                 annotated_frame = self.add_lines(annotated_frame)
