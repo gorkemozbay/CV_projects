@@ -1,5 +1,6 @@
 import cv2
 import Utils.project_settings as ps
+import Utils.math_utils       as math_ut
 from   Utils.data_classes import Line, Point
 from   Controllers.collusion_controller import CollusionController
 
@@ -23,6 +24,9 @@ class VideoController():
                 self.point_couple[1] = Point(x, y)
                 line = Line(self.point_couple[0], self.point_couple[1], ps.RED, ps.LINE_THICKNESS)
                 self.collusion_controller.line_list.append(line)
+        elif event == cv2.EVENT_RBUTTONDOWN:
+            mouse_pos = Point(x, y)
+            self.collusion_controller.check_for_line_remove(mouse_pos)
 
 
     def draw_line(self, frame, line):
