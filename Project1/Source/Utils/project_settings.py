@@ -15,7 +15,7 @@ TEXT_THICKNESS  = 2
 TEXT_POS = (50, 50) 
 
 # YOLO Settings
-SHOW_YOLO_SCREEN = False
+SHOW_YOLO_SCREEN = True
 YOLO_THRESHOLD   = 0.4
 
 # Algorithm Settings

@@ -36,8 +36,15 @@ class VideoController():
 
 
     def get_YOLO_results(self, frame):
-        results = self.model(frame, classes=[1,2,3,7], 
+        results = self.model.track(frame, classes=[1,2,3,7], 
                              show=ps.SHOW_YOLO_SCREEN, conf=ps.YOLO_THRESHOLD ,verbose=False)
+        return results
+
+
+    def get_YOLO_track_results(self, frame):
+        results = self.model.track(frame, classes=[1,2,3,7], 
+                             show=ps.SHOW_YOLO_SCREEN, conf=ps.YOLO_THRESHOLD ,verbose=False,
+                             tracker = "botsort.yaml", persist = True)
         return results
 
 

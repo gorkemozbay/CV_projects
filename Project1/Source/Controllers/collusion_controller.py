@@ -31,3 +31,7 @@ class CollusionController():
             if success:
                 self.line_list.remove(line)
                 break
+            
+    
+    def check_id_collusion(self, results):
+        pass

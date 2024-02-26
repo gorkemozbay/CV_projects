@@ -10,6 +10,7 @@ MODEL      = r'Models\yolov8n.pt'
 
 def main():
     model_path = os.path.join(os.getcwd(), MODEL)
+    print("Loading YOLO Model..")
     model = YOLO(model_path)
     
     source_path = os.path.join(os.getcwd(), TEST_VIDEO)
