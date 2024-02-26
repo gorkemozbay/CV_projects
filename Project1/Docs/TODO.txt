@@ -1,11 +1,11 @@
 
 Todo:
-- Car count algorithm bug fix
-- Object track
 - Object track history
 
 Doing:
-- Ojbect track
+- 
 
 Done:
+- Car count algorithm bug fix
+- Ojbect track
 - Line erase

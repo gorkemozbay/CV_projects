@@ -61,9 +61,13 @@ class VideoController():
         for result in results:
             boxes = result.boxes.cpu().numpy()
             xyxys = boxes.xyxy
-            for xyxy in xyxys:
-                center_coordinates = (int((xyxy[0] + xyxy[2]) / 2), int((xyxy[1] + xyxy[3]) / 2)) 
-                cv2.circle(frame, center_coordinates, ps.BBOX_CIRCLE_RADIUS, ps.GREEN, ps.BBOX_THICKNESS)
+            ids   = boxes.id
+            for xyxy, box_id in zip(xyxys, ids):
+                center_coordinates = (int((xyxy[0] + xyxy[2]) / 2), int((xyxy[1] + xyxy[3]) / 2))
+                id_coordiantes     = (center_coordinates[0] + 3, center_coordinates[1] + 3)  
+                cv2.circle( frame, center_coordinates, ps.BBOX_CIRCLE_RADIUS, ps.GREEN, ps.BBOX_THICKNESS)
+                cv2.putText(frame, str(int(box_id)), id_coordiantes, ps.TEXT_FONT, 
+                    ps.TEXT_FONT_SCALE, ps.BLUE, ps.TEXT_THICKNESS)
         return frame
 
 
@@ -91,7 +95,7 @@ class VideoController():
         while True:
             success, frame = self.cap.read()
             if success:
-                results = self.get_YOLO_results(frame)
+                results = self.get_YOLO_track_results(frame)
                 self.collusion_controller.check_for_collusions(results)
                 #annotated_frame = self.annotate_frame_by_box(results, frame)
                 annotated_frame = self.annotate_frame_by_center(results, frame)
