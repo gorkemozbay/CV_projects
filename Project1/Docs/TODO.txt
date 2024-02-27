@@ -2,10 +2,13 @@
 Todo:
 - Object track history
 
+
 Doing:
 - 
 
+
 Done:
+- Line color change
 - Car count algorithm bug fix
 - Ojbect track
 - Line erase

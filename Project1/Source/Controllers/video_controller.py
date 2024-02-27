@@ -33,6 +33,13 @@ class VideoController():
         cv2.line(frame, (line.point1.x, line.point1.y), (line.point2.x, line.point2.y), 
                  line.color, line.thickness)
         return frame
+    
+    
+    def change_line_color(self, frame, line_list):
+        for line in line_list:
+            cv2.line(frame, (line.point1.x, line.point1.y), (line.point2.x, line.point2.y), 
+                 ps.YELLOW, line.thickness)
+        return frame
 
 
     def get_YOLO_results(self, frame):
@@ -96,10 +103,11 @@ class VideoController():
             success, frame = self.cap.read()
             if success:
                 results = self.get_YOLO_track_results(frame)
-                self.collusion_controller.check_for_collusions(results)
+                collided_lines =self.collusion_controller.check_for_collusions(results)
                 #annotated_frame = self.annotate_frame_by_box(results, frame)
                 annotated_frame = self.annotate_frame_by_center(results, frame)
                 annotated_frame = self.add_lines(annotated_frame)
+                annotated_frame = self.change_line_color(annotated_frame, collided_lines)
                 annotated_frame = self.show_count(annotated_frame)
                 cv2.imshow("out", annotated_frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):

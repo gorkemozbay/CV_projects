@@ -14,6 +14,7 @@ class CollusionController():
 
 
     def check_for_collusions(self, results):
+        collided_lines = []
         for result in results:
             boxes  = result.boxes.cpu().numpy()
             xyxys  = boxes.xyxy
@@ -25,8 +26,8 @@ class CollusionController():
                     if success and (box_id not in self.passed_id_list):
                         self.passed_id_list.append(box_id)
                         self.number_of_collusions += 1
-                        print(f"Collusion happened with id {box_id}")
-                        print(f"Total collusion: {self.number_of_collusions}")
+                        collided_lines.append(line)
+        return collided_lines
                         
                 
     def check_for_line_remove(self, mouse_pos):
@@ -35,4 +36,4 @@ class CollusionController():
             if success:
                 self.line_list.remove(line)
                 break
-            
+
