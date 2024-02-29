@@ -1,11 +1,13 @@
 
 Todo:
 - Object track history
-
+- Better GUI to show results
+- Device select
+- Git ignore  
 
 Doing:
-- 
-
+- Show FPS
+- Performace
 
 Done:
 - Line color change

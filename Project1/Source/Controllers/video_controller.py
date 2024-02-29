@@ -1,4 +1,5 @@
 import cv2
+import time
 import Utils.project_settings as ps
 import Utils.math_utils       as math_ut
 from   Utils.data_classes import Line, Point
@@ -13,6 +14,8 @@ class VideoController():
         self.model = model
         self.point_couple = [None, None]
         self.point_count = 0
+        self.fps_start_time = None
+        self.fps_number_of_frames = 0
 
 
     def check_mouse_event(self, event, x, y, flags, param):
@@ -91,6 +94,16 @@ class VideoController():
         return frame    
     
     
+    def check_fps(self):
+        self.fps_number_of_frames += 1
+        time_passed = time.time() - self.fps_start_time
+        if time_passed >= ps.FPS_INTERVAL:
+            fps = self.fps_number_of_frames / time_passed
+            print(f"FPS: {int(fps)}")
+            self.fps_start_time = time.time()
+            self.fps_number_of_frames = 0
+    
+    
     def run(self):
     
         if not self.cap.isOpened():
@@ -99,17 +112,18 @@ class VideoController():
         
         cv2.namedWindow("out")
         cv2.setMouseCallback("out", self.check_mouse_event)
+        self.fps_start_time = time.time()
         while True:
             success, frame = self.cap.read()
             if success:
                 results = self.get_YOLO_track_results(frame)
                 collided_lines =self.collusion_controller.check_for_collusions(results)
-                #annotated_frame = self.annotate_frame_by_box(results, frame)
                 annotated_frame = self.annotate_frame_by_center(results, frame)
                 annotated_frame = self.add_lines(annotated_frame)
                 annotated_frame = self.change_line_color(annotated_frame, collided_lines)
                 annotated_frame = self.show_count(annotated_frame)
                 cv2.imshow("out", annotated_frame)
+                self.check_fps()
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             else:

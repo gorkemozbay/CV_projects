@@ -1,5 +1,6 @@
 import os
 import threading
+import torch
 from   ultralytics import YOLO 
 
 from   Controllers.video_controller import VideoController
@@ -9,6 +10,11 @@ MODEL      = r'Models\yolov8n.pt'
 
 
 def main():
+    
+    cuda_available = torch.cuda.is_available()
+    device = 'cuda' if cuda_available else 'cpu'
+    print(f"Device: {device}")
+    
     model_path = os.path.join(os.getcwd(), MODEL)
     print("Loading YOLO Model..")
     model = YOLO(model_path)
