@@ -1,16 +1,18 @@
 import cv2
 import time
-import numpy as np
+import numpy                  as np
 import Utils.project_settings as ps
 import Utils.math_utils       as math_ut
-from   Utils.data_classes import Line, Point
+from   Utils.data_classes               import Line, Point
 from   Controllers.collusion_controller import CollusionController
+from   Controllers.UI_controller        import UIController 
 
 class VideoController():
     
     def __init__(self, source, model):
         print("VideoController is created")
         self.collusion_controller = CollusionController()
+        self.UI_controller = UIController()
         self.cap = cv2.VideoCapture(source)
         self.model = model
         self.point_couple = [None, None]
@@ -32,19 +34,6 @@ class VideoController():
         elif event == cv2.EVENT_RBUTTONDOWN:
             mouse_pos = Point(x, y)
             self.collusion_controller.check_for_line_remove(mouse_pos)
-
-
-    def draw_line(self, frame, line):
-        cv2.line(frame, (line.point1.x, line.point1.y), (line.point2.x, line.point2.y), 
-                 line.color, line.thickness)
-        return frame
-    
-    
-    def change_line_color(self, frame, line_list):
-        for line in line_list:
-            cv2.line(frame, (line.point1.x, line.point1.y), (line.point2.x, line.point2.y), 
-                 ps.YELLOW, line.thickness)
-        return frame
 
 
     def get_YOLO_results(self, frame):
@@ -86,36 +75,16 @@ class VideoController():
                     ps.TEXT_FONT_SCALE, ps.BLUE, ps.TEXT_THICKNESS)
         return frame
 
-
-    def draw_background(self, frame):
-        cv2.rectangle(frame, (ps.UI_POS[0], ps.UI_POS[1]), (ps.UI_WIDTH, ps.UI_HEIGHT), ps.BLACK, ps.FILL)
-        return frame
-
-    def add_lines(self, frame):
-        for line in self.collusion_controller.line_list:
-            self.draw_line(frame, line)
-        return frame
-
-
-    def show_count(self, frame):
-        car_count = f"Car Count:{self.collusion_controller.number_of_collusions}"
-        cv2.putText(frame, car_count, ps.TEXT_POS, ps.TEXT_FONT, 
-                    ps.TEXT_FONT_SCALE, ps.WHITE, ps.TEXT_THICKNESS)
-        return frame    
     
-    
-    def check_fps(self, frame):
+    def check_fps(self):
         self.fps_number_of_frames += 1
         time_passed = time.time() - self.fps_start_time
         if time_passed >= ps.FPS_INTERVAL:
             self.fps = int(self.fps_number_of_frames / time_passed)
             self.fps_start_time = time.time()
             self.fps_number_of_frames = 0   
-        fps_string = f"FPS:{self.fps}"
-        cv2.putText(frame, str(fps_string), ps.FPS_POS, ps.TEXT_FONT, 
-                    ps.TEXT_FONT_SCALE, ps.WHITE, ps.TEXT_THICKNESS)
-        return frame
-    
+        return self.fps
+
     
     def run(self):
     
@@ -130,17 +99,19 @@ class VideoController():
             success, frame = self.cap.read()
             if success:
                 results = self.get_YOLO_track_results(frame)
-                collided_lines =self.collusion_controller.check_for_collusions(results)
+                collided_lines, number_of_collusions = self.collusion_controller.check_for_collusions(results)
+                fps = self.check_fps()
                 
-                annotated_frame = self.draw_background(frame)
+                annotated_frame = self.UI_controller.draw_background(frame)
                 annotated_frame = self.annotate_frame_by_center(results, annotated_frame)
-                annotated_frame = self.add_lines(annotated_frame)
-                annotated_frame = self.change_line_color(annotated_frame, collided_lines)
-                annotated_frame = self.show_count(annotated_frame)
-                annotated_frame = self.check_fps(annotated_frame)
+                annotated_frame = self.UI_controller.show_lines(annotated_frame, self.collusion_controller.line_list)
+                annotated_frame = self.UI_controller.change_line_color(annotated_frame, collided_lines)
+                annotated_frame = self.UI_controller.show_count(annotated_frame, number_of_collusions)
+                annotated_frame = self.UI_controller.show_fps(annotated_frame, fps)
                 
                 cv2.imshow("out", annotated_frame) 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             else:
                 pass
+            

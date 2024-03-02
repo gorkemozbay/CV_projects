@@ -31,7 +31,7 @@ class CollusionController():
                         self.passed_id_list.append(box_id)
                         self.number_of_collusions += 1
                         collided_lines.append(line)
-        return collided_lines
+        return collided_lines, self.number_of_collusions
                         
                 
     def check_for_line_remove(self, mouse_pos):
@@ -40,4 +40,3 @@ class CollusionController():
             if success:
                 self.line_list.remove(line)
                 break
-
