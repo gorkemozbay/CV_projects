@@ -1,0 +1,21 @@
+0:  Wrist
+1:  Base of the thumb (the palm side)
+2:  Thumb knuckle (first joint)
+3:  Thumb tip
+4:  ase of the index finger
+5:  Index finger knuckle (first joint)
+6:  Index finger middle joint
+7:  Index finger tip
+8:  Base of the middle finger
+9:  Middle finger knuckle (first joint)
+10: Middle finger middle joint
+11: Middle finger tip
+12: Base of the ring finger
+13: Ring finger knuckle (first joint)
+14: Ring finger middle joint
+15: Ring finger tip
+16: Base of the pinky finger
+17: Pinky finger knuckle (first joint)
+18: Pinky finger middle joint
+19: Pinky finger tip
+20: Tip of the thumb
