@@ -6,10 +6,12 @@ Todo:
 - Git ignore  
 
 Doing:
-- Show FPS
 - Performace
 
 Done:
+- CUDA
+- Very Simple GUI
+- Show FPS
 - Line color change
 - Car count algorithm bug fix
 - Ojbect track

@@ -17,8 +17,12 @@ class CollusionController():
         collided_lines = []
         for result in results:
             boxes  = result.boxes.cpu().numpy()
+            if not boxes:
+                return collided_lines
             xyxys  = boxes.xyxy
             ids    = boxes.id
+            if not isinstance(ids, np.ndarray):
+                return collided_lines
             for xyxy, box_id in zip(xyxys, ids):
                 center_coordinates = Point(int((xyxy[0] + xyxy[2]) / 2), int((xyxy[1] + xyxy[3]) / 2)) 
                 for line in self.line_list:

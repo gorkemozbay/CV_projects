@@ -1,5 +1,6 @@
 import cv2
 import time
+import numpy as np
 import Utils.project_settings as ps
 import Utils.math_utils       as math_ut
 from   Utils.data_classes import Line, Point
@@ -55,7 +56,7 @@ class VideoController():
     def get_YOLO_track_results(self, frame):
         results = self.model.track(frame, classes=[1,2,3,7], 
                              show=ps.SHOW_YOLO_SCREEN, conf=ps.YOLO_THRESHOLD ,verbose=False,
-                             tracker = "botsort.yaml", persist = True)
+                             tracker = "botsort.yaml", persist = True, imgsz = ps.IMG_SIZE, half=True)
         return results
 
 
@@ -71,8 +72,12 @@ class VideoController():
     def annotate_frame_by_center(self, results, frame):
         for result in results:
             boxes = result.boxes.cpu().numpy()
+            if not boxes:
+                return frame
             xyxys = boxes.xyxy
             ids   = boxes.id
+            if not isinstance(ids, np.ndarray):
+                return frame
             for xyxy, box_id in zip(xyxys, ids):
                 center_coordinates = (int((xyxy[0] + xyxy[2]) / 2), int((xyxy[1] + xyxy[3]) / 2))
                 id_coordiantes     = (center_coordinates[0] + 3, center_coordinates[1] + 3)  
@@ -82,6 +87,10 @@ class VideoController():
         return frame
 
 
+    def draw_background(self, frame):
+        cv2.rectangle(frame, (ps.UI_POS[0], ps.UI_POS[1]), (ps.UI_WIDTH, ps.UI_HEIGHT), ps.BLACK, ps.FILL)
+        return frame
+
     def add_lines(self, frame):
         for line in self.collusion_controller.line_list:
             self.draw_line(frame, line)
@@ -89,9 +98,9 @@ class VideoController():
 
 
     def show_count(self, frame):
-        car_count = f"Car Count: {self.collusion_controller.number_of_collusions}"
+        car_count = f"Car Count:{self.collusion_controller.number_of_collusions}"
         cv2.putText(frame, car_count, ps.TEXT_POS, ps.TEXT_FONT, 
-                    ps.TEXT_FONT_SCALE, ps.BLUE, ps.TEXT_THICKNESS)
+                    ps.TEXT_FONT_SCALE, ps.WHITE, ps.TEXT_THICKNESS)
         return frame    
     
     
@@ -102,9 +111,9 @@ class VideoController():
             self.fps = int(self.fps_number_of_frames / time_passed)
             self.fps_start_time = time.time()
             self.fps_number_of_frames = 0   
-        fps_string = f"FPS: {self.fps}"
+        fps_string = f"FPS:{self.fps}"
         cv2.putText(frame, str(fps_string), ps.FPS_POS, ps.TEXT_FONT, 
-                    ps.TEXT_FONT_SCALE, ps.BLUE, ps.TEXT_THICKNESS)
+                    ps.TEXT_FONT_SCALE, ps.WHITE, ps.TEXT_THICKNESS)
         return frame
     
     
@@ -123,7 +132,8 @@ class VideoController():
                 results = self.get_YOLO_track_results(frame)
                 collided_lines =self.collusion_controller.check_for_collusions(results)
                 
-                annotated_frame = self.annotate_frame_by_center(results, frame)
+                annotated_frame = self.draw_background(frame)
+                annotated_frame = self.annotate_frame_by_center(results, annotated_frame)
                 annotated_frame = self.add_lines(annotated_frame)
                 annotated_frame = self.change_line_color(annotated_frame, collided_lines)
                 annotated_frame = self.show_count(annotated_frame)
